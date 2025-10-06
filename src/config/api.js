@@ -1,10 +1,18 @@
-// File: src/config/api.js
+///**
+ * API Base URL Configuration
+ * Using port 5001 to match backend configuration
+ */
+export const API_BASE_URL = 'http://localhost:5001/api';
+
+/**
+ * API Endpoints
+ */c/config/api.js
 
 /**
  * API Base URL Configuration
  * Reads from environment variable or defaults to localhost:5001
  */
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+export const API_BASE_URL = 'http://localhost:5001/api';
 
 /**
  * API Endpoints
