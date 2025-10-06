@@ -10,6 +10,7 @@ const CACHE_DURATION = {
 class CacheManager {
   // Get data from cache
   async get(key) {
+    if (!redisClient) return null;
     try {
       const data = await redisClient.get(key);
       return data ? JSON.parse(data) : null;
@@ -21,6 +22,7 @@ class CacheManager {
 
   // Set data in cache
   async set(key, data, duration = 600) {
+    if (!redisClient) return false;
     try {
       await redisClient.setEx(key, duration, JSON.stringify(data));
       return true;
@@ -32,6 +34,7 @@ class CacheManager {
 
   // Delete specific key
   async delete(key) {
+    if (!redisClient) return false;
     try {
       await redisClient.del(key);
       return true;
@@ -43,6 +46,7 @@ class CacheManager {
 
   // Delete keys matching pattern
   async deletePattern(pattern) {
+    if (!redisClient) return false;
     try {
       const keys = await redisClient.keys(pattern);
       if (keys.length > 0) {
@@ -57,6 +61,7 @@ class CacheManager {
 
   // Clear all cache
   async clear() {
+    if (!redisClient) return false;
     try {
       await redisClient.flushAll();
       return true;

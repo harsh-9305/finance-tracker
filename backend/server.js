@@ -55,15 +55,23 @@ app.get('/health', async (req, res) => {
     // Check database connection
     await pool.query('SELECT 1');
     
-    // Check Redis connection
-    await redisClient.ping();
+    // Check Redis connection if available
+    let redisStatus = 'not configured';
+    if (redisClient) {
+      try {
+        await redisClient.ping();
+        redisStatus = 'connected';
+      } catch (redisError) {
+        redisStatus = 'disconnected';
+      }
+    }
 
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
       services: {
         database: 'connected',
-        redis: 'connected'
+        redis: redisStatus
       }
     });
   } catch (error) {
