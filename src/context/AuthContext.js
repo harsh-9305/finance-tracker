@@ -1,5 +1,5 @@
 // File: src/context/AuthContext.js
-// Fixed duplicate userInfo variable declaration
+// Fixed duplicate userInfo variable declaration - Deploy trigger
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import axios from 'axios';
