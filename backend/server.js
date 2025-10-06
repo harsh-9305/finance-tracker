@@ -31,9 +31,15 @@ app.use(helmet({
   referrerPolicy: { policy: 'same-origin' }
 }));
 
+// Debug CORS environment
+console.log('CORS_ORIGIN from env:', process.env.CORS_ORIGIN);
+
 // CORS configuration
+const corsOrigin = 'https://finance-tracker-kappa-blond.vercel.app';
+console.log('Using CORS origin:', corsOrigin);
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: corsOrigin,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
