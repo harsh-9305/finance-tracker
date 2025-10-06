@@ -140,7 +140,8 @@ export const AuthProvider = ({ children }) => {
       }
       
       // Extract token and user data from response
-      const { token, user } = response.data;
+      const token = response.data?.token || response.data?.data?.token;
+      const userData = response.data?.user || response.data?.data?.user;
       
       if (!token) {
         throw new Error('No token received from server');
@@ -152,27 +153,13 @@ export const AuthProvider = ({ children }) => {
       const decodedToken = jwtDecode(token);
       const userInfo = {
         ...decodedToken,
-        name: name,
-        email: email,
-        role: role
+        name: userData?.name || name,
+        email: userData?.email || email,
+        role: userData?.role || role
       };
       
       setUser(userInfo);
       console.log('User registered successfully:', userInfo); // Debug log
-      
-      return { success: true };
-      
-      localStorage.setItem('token', token);
-      const decoded = jwtDecode(token);
-      
-      // Merge decoded token data with user data from response
-      const userInfo = {
-        ...decoded,
-        name: name || decoded.name, // Use the name from registration
-        email: email || decoded.email, // Use the email from registration
-      };
-      
-      setUser(userInfo);
       
       return { success: true };
     } catch (err) {
