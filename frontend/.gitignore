@@ -1,3 +1,5 @@
+# File: .gitignore (in your frontend root directory)
+
 # Dependencies
 /node_modules
 /.pnp
@@ -8,7 +10,6 @@
 
 # Production
 /build
-/dist
 
 # Misc
 .DS_Store
