@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }) => {
       
       // Check if response is HTML (indicates API connection issue)
       if (typeof response.data === 'string' && response.data.includes('<!doctype html>')) {
-        throw new Error('Backend API is not accessible. Please check if the server is running.');
+        throw new Error('BACKEND_NOT_ACCESSIBLE');
       }
       
       const { token, user: userData } = response.data.data;
@@ -123,8 +123,8 @@ export const AuthProvider = ({ children }) => {
         errorMessage = 'Cannot connect to server. Please check your internet connection.';
       } else if (err.response?.status === 502 || err.response?.status === 503) {
         errorMessage = 'Server is temporarily unavailable. Please try again later.';
-      } else if (err.message.includes('Backend API is not accessible')) {
-        errorMessage = 'Backend server is not running. Please start the backend server.';
+      } else if (err.message === 'BACKEND_NOT_ACCESSIBLE') {
+        errorMessage = 'Backend server is not accessible. The API endpoint may be down.';
       } else {
         errorMessage = err.response?.data?.error || 
                       err.response?.data?.message || 
@@ -153,7 +153,7 @@ export const AuthProvider = ({ children }) => {
       
       // Check if response is HTML (indicates API connection issue)
       if (typeof response.data === 'string' && response.data.includes('<!doctype html>')) {
-        throw new Error('Backend API is not accessible. Please check if the server is running.');
+        throw new Error('BACKEND_NOT_ACCESSIBLE');
       }
       
       if (!response.data) {
@@ -192,8 +192,8 @@ export const AuthProvider = ({ children }) => {
         errorMessage = 'Cannot connect to server. Please check your internet connection.';
       } else if (err.response?.status === 502 || err.response?.status === 503) {
         errorMessage = 'Server is temporarily unavailable. Please try again later.';
-      } else if (err.message.includes('Backend API is not accessible')) {
-        errorMessage = 'Backend server is not running. Please start the backend server.';
+      } else if (err.message === 'BACKEND_NOT_ACCESSIBLE') {
+        errorMessage = 'Backend server is not accessible. The API endpoint may be down.';
       } else {
         errorMessage = err.response?.data?.error || 
                       err.response?.data?.message ||

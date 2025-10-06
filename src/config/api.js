@@ -2,7 +2,9 @@
  * API Base URL Configuration
  * Using port 5001 to match backend configuration
  */
-export const API_BASE_URL = 'https://finance-tracker-2-jkrn.onrender.com/api';
+export const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://finance-tracker-2-jkrn.onrender.com/api'
+  : 'http://localhost:5000/api';
 
 /**
  * API Endpoints
