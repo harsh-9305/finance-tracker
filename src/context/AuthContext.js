@@ -1,4 +1,5 @@
 // File: src/context/AuthContext.js
+// Fixed duplicate userInfo variable declaration
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import axios from 'axios';
