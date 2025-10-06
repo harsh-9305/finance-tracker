@@ -124,6 +124,8 @@ export const AuthProvider = ({ children }) => {
   const register = useCallback(async (name, email, password, role = 'user') => {
     try {
       setError(null);
+      console.log('Sending registration request with:', { name, email, role }); // Debug log
+      
       const response = await axios.post('/auth/register', { 
         name, 
         email, 
@@ -131,16 +133,34 @@ export const AuthProvider = ({ children }) => {
         role 
       });
       
-      // Check if response has the expected structure
-      if (!response.data || !response.data.data) {
-        throw new Error('Invalid response format from server');
+      console.log('Registration response:', response.data); // Debug log
+      
+      if (!response.data) {
+        throw new Error('No response data received from server');
       }
-
-      const { token, user: userData } = response.data.data;
+      
+      // Extract token and user data from response
+      const { token, user } = response.data;
       
       if (!token) {
         throw new Error('No token received from server');
       }
+      
+      localStorage.setItem('token', token);
+      
+      // Create user info from token and registration data
+      const decodedToken = jwtDecode(token);
+      const userInfo = {
+        ...decodedToken,
+        name: name,
+        email: email,
+        role: role
+      };
+      
+      setUser(userInfo);
+      console.log('User registered successfully:', userInfo); // Debug log
+      
+      return { success: true };
       
       localStorage.setItem('token', token);
       const decoded = jwtDecode(token);
@@ -157,10 +177,18 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (err) {
       console.error('Registration error:', err);
-      const errorMessage = err.response?.data?.error || 
-                          err.response?.data?.message ||
-                          err.message ||
-                          'Registration failed';
+      console.error('Error response:', err.response?.data); // Debug log
+      
+      let errorMessage;
+      if (err.response?.status === 502) {
+        errorMessage = 'Server is temporarily unavailable. Please try again later.';
+      } else {
+        errorMessage = err.response?.data?.error || 
+                      err.response?.data?.message ||
+                      err.message ||
+                      'Registration failed';
+      }
+      
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
