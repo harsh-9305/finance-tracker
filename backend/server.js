@@ -35,8 +35,10 @@ app.use(helmet({
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  preflightContinue: false,
+  optionsSuccessStatus: 200
 }));
 
 // Body parser middleware with size limits
@@ -83,11 +85,17 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// API routes
+// API routes with /api prefix
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/users', userRoutes);
+
+// Direct routes without /api prefix for compatibility
+app.use('/auth', authRoutes);
+app.use('/transactions', transactionRoutes);
+app.use('/analytics', analyticsRoutes);
+app.use('/users', userRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
