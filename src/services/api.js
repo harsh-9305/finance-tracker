@@ -1,10 +1,15 @@
-// File: src/components/Transactions/TransactionList.js
+// File: src/services/api.js
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { useAuth } from '../../context/AuthContext';
-import TransactionForm from './TransactionForm';
+import { API_BASE_URL } from '../config/api';
+
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
 const TransactionList = () => {
   const { canModify } = useAuth();

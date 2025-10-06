@@ -1,18 +1,8 @@
-///**
+/**
  * API Base URL Configuration
  * Using port 5001 to match backend configuration
  */
-export const API_BASE_URL = 'http://localhost:5001/api';
-
-/**
- * API Endpoints
- */c/config/api.js
-
-/**
- * API Base URL Configuration
- * Reads from environment variable or defaults to localhost:5001
- */
-export const API_BASE_URL = 'http://localhost:5001/api';
+export const API_BASE_URL = 'https://finance-tracker-2-jkrn.onrender.com/api';
 
 /**
  * API Endpoints
