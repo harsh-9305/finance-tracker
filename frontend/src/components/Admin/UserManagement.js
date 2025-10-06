@@ -3,6 +3,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { API_BASE_URL } from '../../config/api';
+
+// Configure axios for this component
+axios.defaults.baseURL = API_BASE_URL;
 
 const UserManagement = () => {
   const { user: currentUser } = useAuth();
@@ -12,61 +16,21 @@ const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
 
-  const setSampleData = useCallback(() => {
-    const sampleUsers = [
-      {
-        _id: '1',
-        name: 'Admin User',
-        email: 'admin@demo.com',
-        role: 'admin',
-        createdAt: '2024-01-15T10:00:00Z'
-      },
-      {
-        _id: '2',
-        name: 'John Doe',
-        email: 'user@demo.com',
-        role: 'user',
-        createdAt: '2024-02-20T14:30:00Z'
-      },
-      {
-        _id: '3',
-        name: 'Jane Smith',
-        email: 'readonly@demo.com',
-        role: 'read-only',
-        createdAt: '2024-03-10T09:15:00Z'
-      },
-      {
-        _id: '4',
-        name: 'Bob Johnson',
-        email: 'bob@example.com',
-        role: 'user',
-        createdAt: '2024-04-05T16:45:00Z'
-      },
-      {
-        _id: '5',
-        name: 'Alice Williams',
-        email: 'alice@example.com',
-        role: 'read-only',
-        createdAt: '2024-05-12T11:20:00Z'
-      }
-    ];
-    setUsers(sampleUsers);
-  }, []);
+
 
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get('/admin/users');
-      setUsers(response.data);
+      const response = await axios.get('/users');
+      setUsers(response.data.data || response.data);
     } catch (err) {
       console.error('Error fetching users:', err);
       setError('Failed to load users');
-      setSampleData();
     } finally {
       setLoading(false);
     }
-  }, [setSampleData]);
+  }, []);
 
   useEffect(() => {
     fetchUsers();
@@ -97,9 +61,9 @@ const UserManagement = () => {
     }
 
     try {
-      await axios.put(`/admin/users/${userId}/role`, { role: newRole });
+      await axios.put(`/users/${userId}/role`, { role: newRole });
       setUsers(prev => prev.map(u => 
-        u._id === userId ? { ...u, role: newRole } : u
+        u.id === userId ? { ...u, role: newRole } : u
       ));
     } catch (err) {
       console.error('Error updating user role:', err);
@@ -118,8 +82,8 @@ const UserManagement = () => {
     }
 
     try {
-      await axios.delete(`/admin/users/${userId}`);
-      setUsers(prev => prev.filter(u => u._id !== userId));
+      await axios.delete(`/users/${userId}`);
+      setUsers(prev => prev.filter(u => u.id !== userId));
     } catch (err) {
       console.error('Error deleting user:', err);
       alert('Failed to delete user');
@@ -226,16 +190,16 @@ const UserManagement = () => {
               </tr>
             ) : (
               filteredUsers.map((user) => (
-                <tr key={user._id}>
+                <tr key={user.id}>
                   <td>
-                    <span className="user-id">#{user._id.slice(-6)}</span>
+                    <span className="user-id">#{user.id}</span>
                   </td>
                   <td className="user-details">
                     <div className="user-name">{user.name}</div>
                     <div className="user-email">{user.email}</div>
                   </td>
                   <td className="user-role">
-                    {user._id === currentUser.id ? (
+                    {user.id === currentUser.id ? (
                       <span className={`badge badge-${user.role}`}>
                         {user.role} (You)
                       </span>
@@ -243,7 +207,7 @@ const UserManagement = () => {
                       <select
                         className="role-select"
                         value={user.role}
-                        onChange={(e) => handleRoleChange(user._id, e.target.value)}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
                       >
                         <option value="admin">Admin</option>
                         <option value="user">User</option>
@@ -253,7 +217,7 @@ const UserManagement = () => {
                   </td>
                   <td>
                     <div className="user-date">
-                      {new Date(user.createdAt).toLocaleDateString('en-IN', {
+                      {new Date(user.created_at).toLocaleDateString('en-IN', {
                         day: 'numeric',
                         month: 'short',
                         year: 'numeric'
@@ -262,9 +226,9 @@ const UserManagement = () => {
                   </td>
                   <td>
                     <div className="user-actions">
-                      {user._id !== currentUser.id && (
+                      {user.id !== currentUser.id && (
                         <button
-                          onClick={() => handleDeleteUser(user._id)}
+                          onClick={() => handleDeleteUser(user.id)}
                           className="btn btn-danger btn-sm"
                           title="Delete User"
                         >

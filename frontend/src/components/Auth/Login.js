@@ -35,9 +35,9 @@ const Login = () => {
     setError(null);
 
     const demoCredentials = {
-      admin: { email: 'admin@demo.com', password: 'admin123' },
-      user: { email: 'user@demo.com', password: 'user123' },
-      'read-only': { email: 'readonly@demo.com', password: 'readonly123' }
+      admin: { email: 'admin@example.com', password: 'password123' },
+      user: { email: 'user@example.com', password: 'password123' },
+      'read-only': { email: 'readonly@example.com', password: 'password123' }
     };
 
     const { email: demoEmail, password: demoPassword } = demoCredentials[role];

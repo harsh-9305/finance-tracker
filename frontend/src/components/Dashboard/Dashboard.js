@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { API_BASE_URL } from '../../config/api';
 import {
   PieChart, Pie, Cell, LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+
+// Configure axios
+axios.defaults.baseURL = API_BASE_URL;
 
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -30,8 +34,7 @@ const Dashboard = () => {
     } catch (err) {
       console.error('Error fetching transactions:', err);
       setError('Failed to load transactions');
-      // For demo purposes, use sample data if API fails
-      setSampleData();
+      setTransactions([]);
     } finally {
       setLoading(false);
     }
@@ -41,20 +44,7 @@ const Dashboard = () => {
     fetchTransactions();
   }, [fetchTransactions]);
 
-  // Sample data for demo
-  const setSampleData = () => {
-    const sampleTransactions = [
-      { type: 'expense', amount: 5000, category: 'Food', date: '2025-10-01', description: 'Groceries' },
-      { type: 'expense', amount: 2000, category: 'Transport', date: '2025-10-02', description: 'Uber' },
-      { type: 'income', amount: 50000, category: 'Salary', date: '2025-10-01', description: 'Monthly salary' },
-      { type: 'expense', amount: 3000, category: 'Entertainment', date: '2025-10-03', description: 'Movie tickets' },
-      { type: 'expense', amount: 15000, category: 'Shopping', date: '2025-10-05', description: 'Clothes' },
-      { type: 'expense', amount: 8000, category: 'Food', date: '2025-09-28', description: 'Restaurant' },
-      { type: 'income', amount: 10000, category: 'Freelance', date: '2025-09-25', description: 'Project payment' },
-      { type: 'expense', amount: 12000, category: 'Bills', date: '2025-09-20', description: 'Electricity' },
-    ];
-    setTransactions(sampleTransactions);
-  };
+
 
   // Calculate statistics using useMemo
   const stats = useMemo(() => {
@@ -86,7 +76,7 @@ const Dashboard = () => {
     transactions
       .filter(t => t.type === 'expense')
       .forEach(t => {
-        const category = t.category || 'Uncategorized';
+        const category = t.category_name || 'Uncategorized';
         categoryMap[category] = (categoryMap[category] || 0) + Number(t.amount || 0);
       });
     

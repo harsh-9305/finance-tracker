@@ -2,11 +2,11 @@ const redis = require('redis');
 require('dotenv').config();
 
 const redisClient = redis.createClient({
+  url: process.env.REDIS_URL,
   socket: {
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
+    tls: true,
+    rejectUnauthorized: false,
   },
-  password: process.env.REDIS_PASSWORD || undefined,
 });
 
 redisClient.on('connect', () => {

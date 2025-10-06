@@ -5,8 +5,10 @@ import axios from 'axios';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from '../../context/AuthContext';
 import TransactionForm from './TransactionForm';
+import { API_BASE_URL } from '../../config/api';
 
-const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Healthcare', 'Education', 'Other'];
+// Configure axios
+axios.defaults.baseURL = API_BASE_URL;
 
 const TransactionList = () => {
   const { canModify } = useAuth();
@@ -28,20 +30,7 @@ const TransactionList = () => {
     dateTo: ''
   });
 
-  const setSampleData = useCallback(() => {
-    const sampleTransactions = [
-      { _id: '1', type: 'income', amount: 50000, category: 'Salary', date: '2025-10-01', description: 'Monthly salary' },
-      { _id: '2', type: 'expense', amount: 5000, category: 'Food', date: '2025-10-02', description: 'Groceries shopping' },
-      { _id: '3', type: 'expense', amount: 2000, category: 'Transport', date: '2025-10-03', description: 'Uber rides' },
-      { _id: '4', type: 'expense', amount: 3000, category: 'Entertainment', date: '2025-10-04', description: 'Movie tickets' },
-      { _id: '5', type: 'income', amount: 10000, category: 'Freelance', date: '2025-10-05', description: 'Website project' },
-      { _id: '6', type: 'expense', amount: 15000, category: 'Shopping', date: '2025-10-06', description: 'New clothes' },
-      { _id: '7', type: 'expense', amount: 8000, category: 'Food', date: '2025-09-28', description: 'Restaurant dinner' },
-      { _id: '8', type: 'expense', amount: 12000, category: 'Bills', date: '2025-09-25', description: 'Electricity bill' },
-    ];
-    setTransactions(sampleTransactions);
-    setHasMore(false);
-  }, []);
+
 
   const fetchTransactions = useCallback(async (pageNum = 1) => {
     try {
@@ -50,26 +39,25 @@ const TransactionList = () => {
         params: { page: pageNum, limit: 20 }
       });
       
-      // Ensure transactions is always an array
-      const txns = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+      const txns = response.data.data || response.data || [];
       if (pageNum === 1) {
         setTransactions(txns);
       } else {
         setTransactions(prev => [...prev, ...txns]);
       }
       
-      setHasMore(response.data.length === 20);
+      setHasMore(txns.length === 20);
+      setError(null);
     } catch (err) {
       console.error('Error fetching transactions:', err);
       setError('Failed to load transactions');
       if (pageNum === 1) {
-        setSampleData();
+        setTransactions([]);
       }
     } finally {
       setLoading(false);
     }
-
-  }, [setSampleData]);
+  }, []);
 
   useEffect(() => {
     fetchTransactions(1);
@@ -78,9 +66,9 @@ const TransactionList = () => {
   useEffect(() => {
     const filtered = transactions.filter(transaction => {
       const matchesSearch = (transaction.description && transaction.description.toLowerCase().includes(filters.search.toLowerCase())) ||
-        (transaction.category && transaction.category.toLowerCase().includes(filters.search.toLowerCase()));
+        (transaction.category_name && transaction.category_name.toLowerCase().includes(filters.search.toLowerCase()));
       const matchesType = filters.type === 'all' || transaction.type === filters.type;
-      const matchesCategory = filters.category === 'all' || transaction.category === filters.category;
+      const matchesCategory = filters.category === 'all' || transaction.category_name === filters.category;
       
       let matchesDate = true;
       if (filters.dateFrom && filters.dateTo) {
@@ -154,7 +142,7 @@ const TransactionList = () => {
 
     try {
       await axios.delete(`/transactions/${id}`);
-      setTransactions(prev => prev.filter(t => t._id !== id));
+      setTransactions(prev => prev.filter(t => t.id !== id));
     } catch (err) {
       console.error('Error deleting transaction:', err);
       alert('Failed to delete transaction');
@@ -164,7 +152,7 @@ const TransactionList = () => {
   const handleSaveTransaction = useCallback(async (transactionData) => {
     try {
       if (editingTransaction) {
-        await axios.put(`/transactions/${editingTransaction._id}`, transactionData);
+        await axios.put(`/transactions/${editingTransaction.id}`, transactionData);
       } else {
         await axios.post('/transactions', transactionData);
       }
@@ -270,7 +258,7 @@ const TransactionList = () => {
               onChange={(e) => handleFilterChange('category', e.target.value)}
             >
               <option value="all">All Categories</option>
-              {CATEGORIES.map(cat => (
+              {[...new Set(transactions.map(t => t.category_name).filter(Boolean))].map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
@@ -324,14 +312,14 @@ const TransactionList = () => {
         >
           <div className="transactions-list">
             {filteredTransactions.map((transaction) => (
-              <div key={transaction._id} className="transaction-card">
+              <div key={transaction.id} className="transaction-card">
                 <div className="transaction-info">
                   <div className="transaction-category">
                     <div className="type-badge">
                       {transaction.type === 'income' ? '💰' : '💸'}
                     </div>
                     <div className="transaction-details-text">
-                      <h4>{transaction.category}</h4>
+                      <h4>{transaction.category_name || 'Uncategorized'}</h4>
                       <p className="transaction-description">{transaction.description}</p>
                     </div>
                   </div>
@@ -358,7 +346,7 @@ const TransactionList = () => {
                       ✏️
                     </button>
                     <button
-                      onClick={() => handleDeleteTransaction(transaction._id)}
+                      onClick={() => handleDeleteTransaction(transaction.id)}
                       className="btn-icon"
                       title="Delete"
                     >
