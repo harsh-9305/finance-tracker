@@ -92,6 +92,11 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const response = await axios.post('/auth/login', { email, password });
       
+      // Check if response is HTML (indicates API connection issue)
+      if (typeof response.data === 'string' && response.data.includes('<!doctype html>')) {
+        throw new Error('Backend API is not accessible. Please check if the server is running.');
+      }
+      
       const { token, user: userData } = response.data.data;
       
       if (!token) {
@@ -113,10 +118,19 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (err) {
       console.error('Login error:', err);
-      const errorMessage = err.response?.data?.error || 
-                          err.response?.data?.message || 
-                          err.message ||
-                          'Login failed';
+      let errorMessage;
+      if (err.code === 'NETWORK_ERROR' || err.message.includes('Network Error')) {
+        errorMessage = 'Cannot connect to server. Please check your internet connection.';
+      } else if (err.response?.status === 502 || err.response?.status === 503) {
+        errorMessage = 'Server is temporarily unavailable. Please try again later.';
+      } else if (err.message.includes('Backend API is not accessible')) {
+        errorMessage = 'Backend server is not running. Please start the backend server.';
+      } else {
+        errorMessage = err.response?.data?.error || 
+                      err.response?.data?.message || 
+                      err.message ||
+                      'Login failed';
+      }
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
@@ -126,6 +140,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       console.log('Sending registration request with:', { name, email, role }); // Debug log
+      console.log('API URL:', API_BASE_URL); // Debug log
       
       const response = await axios.post('/auth/register', { 
         name, 
@@ -135,6 +150,11 @@ export const AuthProvider = ({ children }) => {
       });
       
       console.log('Registration response:', response.data); // Debug log
+      
+      // Check if response is HTML (indicates API connection issue)
+      if (typeof response.data === 'string' && response.data.includes('<!doctype html>')) {
+        throw new Error('Backend API is not accessible. Please check if the server is running.');
+      }
       
       if (!response.data) {
         throw new Error('No response data received from server');
@@ -168,8 +188,12 @@ export const AuthProvider = ({ children }) => {
       console.error('Error response:', err.response?.data); // Debug log
       
       let errorMessage;
-      if (err.response?.status === 502) {
+      if (err.code === 'NETWORK_ERROR' || err.message.includes('Network Error')) {
+        errorMessage = 'Cannot connect to server. Please check your internet connection.';
+      } else if (err.response?.status === 502 || err.response?.status === 503) {
         errorMessage = 'Server is temporarily unavailable. Please try again later.';
+      } else if (err.message.includes('Backend API is not accessible')) {
+        errorMessage = 'Backend server is not running. Please start the backend server.';
       } else {
         errorMessage = err.response?.data?.error || 
                       err.response?.data?.message ||
