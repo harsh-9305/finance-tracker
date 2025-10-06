@@ -131,6 +131,11 @@ export const AuthProvider = ({ children }) => {
         role 
       });
       
+      // Check if response has the expected structure
+      if (!response.data || !response.data.data) {
+        throw new Error('Invalid response format from server');
+      }
+
       const { token, user: userData } = response.data.data;
       
       if (!token) {
@@ -143,8 +148,8 @@ export const AuthProvider = ({ children }) => {
       // Merge decoded token data with user data from response
       const userInfo = {
         ...decoded,
-        name: userData?.name || decoded.name,
-        email: userData?.email || decoded.email,
+        name: name || decoded.name, // Use the name from registration
+        email: email || decoded.email, // Use the email from registration
       };
       
       setUser(userInfo);
